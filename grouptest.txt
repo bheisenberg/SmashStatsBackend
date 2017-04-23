@@ -1,0 +1,7 @@
+http://api.smash.gg/phase_group/297632?expand[]=entrants
+http://api.smash.gg/phase_group/297628?expand[]=entrants
+http://api.smash.gg/phase_group/248175?expand[]=entrants
+http://api.smash.gg/phase_group/250079?expand[]=entrants
+http://api.smash.gg/phase_group/250080?expand[]=entrants
+http://api.smash.gg/phase_group/250081?expand[]=entrants
+http://api.smash.gg/phase_group/250082?expand[]=entrants

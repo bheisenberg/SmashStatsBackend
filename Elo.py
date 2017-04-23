@@ -17,8 +17,7 @@ class Elo:
         self.games = 0
         self.k = 40
         self.sets = sets
-        self.player_dict = {}
-        self.tournaments = {}
+        print('starting elo')
 
 
     def e_a (self, win_elo, loss_elo):
@@ -36,11 +35,12 @@ class Elo:
         return player_dict
 
 
-    def Get_Elo(self):
+    def Calculate_Elo(self):
+        print('Calculating elo...')
         num=0
-        players = self.Player_Dict()
+        player_dict = self.Player_Dict()
+        players = {}
         for set in self.sets:
-            #print(set[1])
             if (set[0] is not None and set[1] is not None) and (set[0] != 'None' and set[1] != 'None'):
                 winner_id = set[0]
                 loser_id = set[1]
@@ -61,8 +61,8 @@ class Elo:
                 players[loser_id] = loser
                 #print(winner_id)
                 #print(loser_id)
-                print('{0} gained {1} elo. Now has {2} after {3} games'.format(self.player_dict[winner_id], win_elo, winner.elo, winner.games))
-                print('{0} lost {1} elo. Now has {2} after {3} games'.format(self.player_dict[loser_id], loss_elo, loser.elo, loser.games))
+                print('{0} gained {1} elo. Now has {2} after {3} games'.format(player_dict[winner_id], win_elo, winner.elo, winner.games))
+                print('{0} lost {1} elo. Now has {2} after {3} games'.format(player_dict[loser_id], loss_elo, loser.elo, loser.games))
                 num += 1
         return players
 

@@ -46,7 +46,6 @@ class Tournament:
         self.tournament_name = tournament_name
         self.tournament_date = tournament_date
 
-
 def create_tables():
     cur.executescript('''
     DROP TABLE IF EXISTS Player;
@@ -61,7 +60,7 @@ def create_tables():
         state VARCHAR(20),
         country VARCHAR(20),
         twitter_handle VARCHAR(20),
-        twitch_stream VARCHAR(20),
+        twitch_stream VARCHAR(20)
     );
 
     CREATE TABLE TournamentSet (
@@ -76,15 +75,13 @@ def create_tables():
         FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id)
         FOREIGN KEY (entrant_1_id) REFERENCES Player(player_id)
         FOREIGN KEY (entrant_2_id) REFERENCES Player(player_id)
-
     );
 
     CREATE TABLE Tournament (
         tournament_id INTEGER PRIMARY KEY,
         tournament_name VARCHAR(20),
         tournament_date DATE
-    )
-    ''')
+    )''')
 
 def winner(x, y):
     if x > y:
@@ -117,8 +114,9 @@ def populate_players():
                 state = split_line[3]
                 country = split_line[4]
                 cur.execute(''' INSERT OR IGNORE INTO Player (player_id, tag, elo, prefix, state, country)
-                VALUES ( ?, ?, ?, ?, ? )''', (player_id, tag, 0, prefix, state, country))
+                VALUES ( ?, ?, ?, ?, ?, ? )''', (player_id, tag, 0, prefix, state, country))
     print("Insertion successful")
+    conn.commit()
 
 def populate_tournaments():
     print("Loading tournaments...")
@@ -132,6 +130,7 @@ def populate_tournaments():
             cur.execute(''' INSERT OR IGNORE INTO Tournament (tournament_id, tournament_name, tournament_date)
                 VALUES (?, ?, datetime(?, 'unixepoch', 'localtime'))''', (tournament.tournament_id, tournament.tournament_name, tournament.tournament_date))
     print("Insertion successful")
+    conn.commit()
 
 def populate_sets():
     print("Loading sets...")
@@ -147,16 +146,24 @@ def populate_sets():
                 TournamentSets.append(tournament_set)
                 cur.execute(''' INSERT OR IGNORE INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id)
                 VALUES ( ?, ?, ?, ?, ?, ?, ? )''', (tournament_set.entrant_1_id, tournament_set.entrant_1_score, tournament_set.entrant_2_id, tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament_set.tournament_id))
-                sets = cur.execute('''SELECT s.winner_id, s.loser_id, t.tournament_date FROM TournamentSet s, Tournament t WHERE s.tournament_id = t.tournament_id ''').fetchall()
-                sets.sort(key=lambda x:x[2])
-                #players = Elo()
+    conn.commit()
 
+def update_player_elo():
+    print('Updating players...')
+    sets = cur.execute('''SELECT s.winner_id, s.loser_id, t.tournament_date FROM TournamentSet s, Tournament t WHERE s.tournament_id = t.tournament_id ''').fetchall()
+    sets.sort(key=lambda x: x[2])
+    eloCalculator = Elo.Elo(sets)
+    players = eloCalculator.Calculate_Elo()
+    for player_id in players.keys():
+        print(player_id)
+        cur.execute('UPDATE Player SET elo = {0} WHERE player_id = {1}'.format(players[player_id].elo, player_id))
+    conn.commit()
 
-    print("Insertion successful")
-
+print("Insertion successful")
 create_tables()
 populate_players()
-populate_sets()
 populate_tournaments()
-conn.commit()
+populate_sets()
+update_player_elo()
+
 
