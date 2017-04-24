@@ -1,0 +1,3 @@
+class TableContainer:
+    Tournaments = {}
+    Sets = []

@@ -155,7 +155,7 @@ def update_player_elo():
     eloCalculator = Elo.Elo(sets)
     players = eloCalculator.Calculate_Elo()
     for player_id in players.keys():
-        print(player_id)
+        #print(player_id)
         cur.execute('UPDATE Player SET elo = {0} WHERE player_id = {1}'.format(players[player_id].elo, player_id))
     conn.commit()
 
