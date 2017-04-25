@@ -1,5 +1,5 @@
 import melee
-import gg
+import smash_gg_connector
 
 connection_type = 'tournament'
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
@@ -40,8 +40,8 @@ class Tournament_Loader:
     def load_tournaments(self):
         print('loading tournaments')
         #start_time = time.time()
-        pages = gg.Connection(base_url).pages
-        connection = gg.Async_Connection(self.get_urls(pages))
+        pages = smash_gg_connector.Connection(base_url).pages
+        connection = smash_gg_connector.Async_Connection(self.get_urls(pages))
         tournament_pages = connection.data_list
         for tournament_page in tournament_pages:
             tournament_page = self.get_tournaments(tournament_page)
@@ -51,8 +51,8 @@ class Tournament_Loader:
                     tid = str(tournament['id'])
                     slug = self.melee_slug(tournament)
                     date = tournament['startAt']
-                    phase_url = gg.phase(slug)
-                    entrants_url = gg.entrants(slug)
+                    phase_url = smash_gg_connector.phase(slug)
+                    entrants_url = smash_gg_connector.entrants(slug)
                     melee_tournament = melee.Tournament(tid, name, date, phase_url, entrants_url)
                     self.tournaments[tid] = melee_tournament
                     print('{0} added to tournaments'.format(name))

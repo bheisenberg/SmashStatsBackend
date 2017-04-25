@@ -41,7 +41,7 @@ class Elo:
         return player_dict
 
     def Save_Record(self, record):
-        player = 'Stango'
+        player = 'Armada'
         with open('text/record.txt', 'w', encoding='utf-8') as record_file:
             for line in record:
                 if(player in line):

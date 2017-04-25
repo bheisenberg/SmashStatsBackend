@@ -6,7 +6,7 @@ import json
 from tornado import ioloop, httpclient, escape
 import tornado
 import requests.sessions
-import gg
+import smash_gg_connector
 
 #url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
 reader = codecs.getreader("utf-8")
@@ -26,7 +26,7 @@ i = 0
 
 def handle_request(response):
     json_data = tornado.escape.json_decode(response.body)
-    tournaments = gg.tournaments(json_data)
+    tournaments = smash_gg_connector.tournaments(json_data)
     for tournament in tournaments:
         print(tournament['name'])
     global i

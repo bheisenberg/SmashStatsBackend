@@ -1,4 +1,4 @@
-import gg
+import smash_gg_connector
 
 class Group_Loader:
     def __init__(self, tournaments):
@@ -18,7 +18,7 @@ class Group_Loader:
 
     def load_phases(self):
         print('loading phases...')
-        connection = gg.Phase_Connection(self.tournaments)
+        connection = smash_gg_connector.Phase_Connection(self.tournaments)
         phases = connection.data_dict
         for phase in phases:
             self.get_phases(phases[phase], phase)

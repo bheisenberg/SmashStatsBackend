@@ -1,4 +1,4 @@
-import gg
+import smash_gg_connector
 import melee
 
 class Player_Loader():
@@ -31,16 +31,17 @@ class Player_Loader():
                     try:
                         if type(entrant['playerIds']) == dict:
                             player = entrant['playerIds'][str(participant)]
+                            self.players[entrant_id] = player
                         else:
                             player = entrant['playerIds'][0]
-                        self.players[entrant_id] = player
-                        #print('{0} {1}'.format(entrant_id, self.players[entrant_id]))
+                            self.players[entrant_id] = player
+
                     except:
                         print("Player could not be loaded")
 
     def load_players(self):
         print('loading players...')
-        connection = gg.Async_Connection(self.get_entrant_pages())
+        connection = smash_gg_connector.Async_Connection(self.get_entrant_pages())
         entrant_data = connection.data_list
         for entrant_page in entrant_data:
             self.get_players(entrant_page)
@@ -48,7 +49,7 @@ class Player_Loader():
 
     def create_players(self):
         print("Creating players...")
-        connection = gg.Async_Connection(self.get_player_urls(), True)
+        connection = smash_gg_connector.Async_Connection(self.get_player_urls())
         player_data = connection.data_list
         for player in player_data:
             if(player is not None):

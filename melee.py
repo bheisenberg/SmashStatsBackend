@@ -1,4 +1,4 @@
-import gg
+import smash_gg_connector
 
 class TournamentSet:
     def __init__(self, entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, tournament_id):
@@ -11,20 +11,10 @@ class TournamentSet:
         self.tournament_id = tournament_id
 
     def get_winner(self):
-        if self.entrant_1_score > self.entrant_2_score:
-            return self.entrant_1_id
-        elif self.entrant_2_score > self.entrant_1_score:
-            return self.entrant_2_id
-        else:
-            return None
+        return self.entrant_1_id if (self.entrant_1_score > self.entrant_2_score) else self.entrant_2_id
 
     def get_loser(self):
-        if self.entrant_1_score < self.entrant_2_score:
-            return self.entrant_1_id
-        elif self.entrant_2_score < self.entrant_1_score:
-            return self.entrant_2_id
-        else:
-            return None
+        return self.entrant_1_id if (self.entrant_1_score < self.entrant_2_score) else self.entrant_2_id
 
 
 class Tournament:

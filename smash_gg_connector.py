@@ -6,8 +6,6 @@ import tornado
 from tornado import ioloop, httpclient, escape
 import multiprocessing
 
-from enum import Enum
-
 per_page = 100
 api = 'https://api.smash.gg/'
 phase_endpoint = '/phase_groups?expand=[]groups&per_page=100'
@@ -34,7 +32,6 @@ class Connection:
 
     def get_pages (self):
         pages = self.data['total_count']/per_page
-        #print('{0} pages found'.format(pages))
         return pages
 
 class Async_Connection:
@@ -52,7 +49,6 @@ class Async_Connection:
 
         if self.requests == 0:
             ioloop.IOLoop.instance().stop()
-            #return self.data_list
 
     def get_data(self):
         http_client = httpclient.AsyncHTTPClient()
