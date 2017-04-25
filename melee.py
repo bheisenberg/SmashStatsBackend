@@ -1,4 +1,4 @@
-import smash_gg_connector
+#Created by Brian Eisenberg 4/25/2017
 
 class TournamentSet:
     def __init__(self, entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, tournament_id):

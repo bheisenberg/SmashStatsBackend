@@ -1,3 +1,4 @@
+#Created by Brian Eisenberg 4/25/2017
 import melee
 import smash_gg_connector
 

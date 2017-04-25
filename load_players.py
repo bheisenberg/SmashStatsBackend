@@ -1,3 +1,4 @@
+#Created by Brian Eisenberg 4/25/2017
 import smash_gg_connector
 import melee
 
@@ -13,53 +14,52 @@ class Player_Loader():
                 entrant_pages.append(entrant_page)
         return entrant_pages
 
-    def get_player_urls(self):
+    def get_player_urls(self, entrants):
         urls = []
-        for player in self.players.values():
+        for player in entrants.values():
             urls.append('https://api.smash.gg/player/{0}'.format(player))
         return urls
 
     def format_string(self, string):
         if string is not None: return string.replace(' ', '_')
 
-    def get_players(self, player_data):
-        if 'entrants' in player_data['entities']:
-            for entrant in player_data['entities']['entrants']:
-                if entrant['id'] not in self.players:
-                    entrant_id = (entrant['id'])
-                    participant = entrant['participantIds'][0]
-                    try:
-                        if type(entrant['playerIds']) == dict:
-                            player = entrant['playerIds'][str(participant)]
-                            self.players[entrant_id] = player
-                        else:
-                            player = entrant['playerIds'][0]
-                            self.players[entrant_id] = player
+    def has_entrants(self, entrant_data):
+        return 'entrants' in entrant_data['entities']
 
-                    except:
-                        print("Player could not be loaded")
+    def get_entrants(self, entrant_data):
+        return entrant_data['entities']['entrants']
 
-    def load_players(self):
-        print('loading players...')
+    def create_entrants_dict(self):
+        entrants = {}
+        print('loading entrants...')
         connection = smash_gg_connector.Async_Connection(self.get_entrant_pages())
         entrant_data = connection.data_list
         for entrant_page in entrant_data:
-            self.get_players(entrant_page)
-        return self.create_players()
+            if self.has_entrants(entrant_page):
+                for entrant in self.get_entrants(entrant_page):
+                    entrant_id = entrant['id']
+                    if entrant_id not in entrants.keys():
+                        participant = entrant['participantIds'][0]
+                        try:
+                            player = entrant['playerIds'][str(participant)] if type(entrant['playerIds']) == dict else entrant['playerIds'][0]
+                            entrants[entrant_id] = player
+                        except:
+                            print("Player could not be loaded")
+        return self.create_players(entrants)
 
-    def create_players(self):
+    def create_players(self, entrants):
         print("Creating players...")
-        connection = smash_gg_connector.Async_Connection(self.get_player_urls())
+        connection = smash_gg_connector.Async_Connection(self.get_player_urls(entrants))
         player_data = connection.data_list
         for player in player_data:
-            if(player is not None):
-                player_entity = player['entities']['player']
-                player_id = player_entity['id']
-                tag = self.format_string(player_entity['gamerTag'])
-                prefix = self.format_string(player_entity['prefix'])
-                state = player_entity['state']
-                country = self.format_string(player_entity['country'])
-                player = melee.Player(player_id, tag, prefix, state, country)
-                self.players[player_id] = player
-                print(player.to_string())
+            player_entity = player['entities']['player']
+            player_id = player_entity['id']
+            tag = self.format_string(player_entity['gamerTag'])
+            prefix = self.format_string(player_entity['prefix'])
+            state = player_entity['state']
+            country = self.format_string(player_entity['country'])
+            player = melee.Player(player_id, tag, prefix, state, country)
+            self.players[player_id] = player
+        for player in self.players.values():
+            print(player.to_string())
         return self.players
