@@ -9,7 +9,7 @@ class Player:
     def __init__(self):
         self.elo = 1000
         self.games = 0
-        self.k = self.calculate_k()
+        self.k = 40
         self.master = False
 
     def calculate_k(self):
@@ -31,7 +31,7 @@ class Elo:
 
     def Player_Dict(self):
         player_dict = {}
-        with open("playerdict.txt", 'r', encoding='utf-8') as text:
+        with open("text/playerdict.txt", 'r', encoding='utf-8') as text:
             for line in text:
                 splitline = str.split(line)
                 pid = splitline[0]
@@ -40,12 +40,21 @@ class Elo:
                 print("{0} {1}".format(pid, name))
         return player_dict
 
+    def Save_Record(self, record):
+        player = 'Stango'
+        with open('text/record.txt', 'w', encoding='utf-8') as record_file:
+            for line in record:
+                if(player in line):
+                    print(line)
+                    record_file.write(line)
+                    record_file.write('\n')
 
     def Calculate_Elo(self):
         print('Calculating elo...')
         num=0
         player_dict = self.Player_Dict()
         players = {}
+        record = []
         for set in self.sets:
             if (set[0] is not None and set[1] is not None) and (set[0] != 'None' and set[1] != 'None'):
                 winner_id = set[0]
@@ -56,8 +65,8 @@ class Elo:
                 #dif = abs(winner.elo - loser.elo)
                 ea = self.e_a(winner.elo, loser.elo)
                 eb = 1-ea
-                win_elo = winner.calculate_k() * eb
-                loss_elo = loser.calculate_k() * eb
+                win_elo = int(winner.calculate_k() * eb)
+                loss_elo = int(loser.calculate_k() * eb)
                 #print(winner.k/c)
                 winner.elo += win_elo
                 loser.elo -= loss_elo
@@ -67,10 +76,10 @@ class Elo:
                 players[loser_id] = loser
                 #print(winner_id)
                 #print(loser_id)
-                if(winner_id == '13740' or loser_id == '13740'):
-                    print('{0} gained {1} elo. Now has {2} after {3} games. K is now {4}'.format(player_dict[winner_id], win_elo, winner.elo, winner.games, winner.calculate_k()))
-                    print('{0} lost {1} elo. Now has {2} after {3} games. K is now {4}'.format(player_dict[loser_id], loss_elo, loser.elo, loser.games, winner.calculate_k()))
-                num += 1
+                record.append('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(player_dict[winner_id], win_elo, player_dict[loser_id], winner.elo, winner.games, winner.calculate_k()))
+                record.append('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(player_dict[loser_id], loss_elo, player_dict[winner_id], loser.elo, loser.games, winner.calculate_k()))
+                #num += 1
+        self.Save_Record(record)
         return players
 
 

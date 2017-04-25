@@ -1,34 +1,29 @@
-import json
-import codecs
-import urllib.parse
-import urllib.request
-import time
-import string_operations
 import melee
 import gg
 
+connection_type = 'tournament'
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
 
-class TournamentLoader:
+class Tournament_Loader:
     def __init__(self, container):
         self.container = container
         self.pages = 2
+        self.tournaments = {}
 
     def melee_slug(self, tournament):
         tid = str(tournament['id'])
-        #num_events = tournament['mutations']['cardData'][tid]['eventData']['count']
-        #print(num_events)
         top_events = tournament['mutations']['cardData'][tid]['eventData']['topEvents']
         num_events = len(top_events)
-        #print(top_events)
         for x in range(0, num_events):
-            #print(top_events[x]['name'])
             if top_events[x]['name'] == "Melee Singles":
                 return top_events[x]['slug']
 
     def tournament_complete(self, tournament):
         tid = str(tournament['id'])
         return bool(tournament['mutations']['cardData'][tid]['hasRegistrationEnded'])
+
+    def get_tournaments(self, data):
+        return data['items']['entities']['tournament']
 
     def valid_tournament (self, tournament):
         return self.melee_slug(tournament) is not None and self.tournament_complete(tournament)
@@ -44,33 +39,22 @@ class TournamentLoader:
 
     def load_tournaments(self):
         print('loading tournaments')
-        start_time = time.time()
+        #start_time = time.time()
         pages = gg.Connection(base_url).pages
         connection = gg.Async_Connection(self.get_urls(pages))
-        tournaments = connection.data_list
-        for tournament in tournaments:
-            if (self.valid_tournament(tournament)):
-                name = format(tournament['name'])
-                tid = str(tournament['id'])
-                slug = self.melee_slug(tournament)
-                date = tournament['startAt']
-                tournament = melee.Tournament(name, date, tid, gg.phase(slug), gg.entrants(slug))
-                self.container.Tournaments[tid] = tournament
-                print('{0} added to tournaments'.format(name))
-        '''while (x < self.pages):
-            url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page={0}&per_page={1}'.format(x, per_page)
-            connection = gg.Connection(url)
-            self.pages = connection.pages
-            tournaments = gg.tournaments(connection.data)
-            for tournament in tournaments:
-                if(self.valid_tournament(tournament)):
+        tournament_pages = connection.data_list
+        for tournament_page in tournament_pages:
+            tournament_page = self.get_tournaments(tournament_page)
+            for tournament in tournament_page:
+                if (self.valid_tournament(tournament)):
                     name = format(tournament['name'])
                     tid = str(tournament['id'])
                     slug = self.melee_slug(tournament)
                     date = tournament['startAt']
-                    tournament = melee.Tournament(name, date, tid, gg.phase(slug), gg.entrants(slug))
-                    self.container.Tournaments[tid] = tournament
-                    #print('{0} added to tournaments'.format(name))
-            x += 1'''
-        #print('Tournaments: {0}'.format(tournaments))
-        #print('Finished in {0} seconds'.format(time.time()-start_time))
+                    phase_url = gg.phase(slug)
+                    entrants_url = gg.entrants(slug)
+                    melee_tournament = melee.Tournament(tid, name, date, phase_url, entrants_url)
+                    self.tournaments[tid] = melee_tournament
+                    print('{0} added to tournaments'.format(name))
+        print(len(self.tournaments))
+        return self.tournaments

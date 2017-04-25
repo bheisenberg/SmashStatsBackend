@@ -2,9 +2,9 @@ import urllib.parse
 import urllib.request
 import json
 import codecs
-import ujson
 import tornado
 from tornado import ioloop, httpclient, escape
+import multiprocessing
 
 from enum import Enum
 
@@ -13,17 +13,11 @@ api = 'https://api.smash.gg/'
 phase_endpoint = '/phase_groups?expand=[]groups&per_page=100'
 entrants_endpoint = '/standings?expand[0]=entrants'
 
-
-def tournaments(data):
-    return data['items']['entities']['tournament']
-
-
 def phase(slug):
-    return slug+phase_endpoint
-
+    return '{0}{1}{2}'.format(api, slug, phase_endpoint)
 
 def entrants(slug):
-    return slug+entrants_endpoint
+    return '{0}{1}{2}'.format(api, slug, entrants_endpoint)
 
 class Connection:
     def __init__(self, url):
@@ -34,7 +28,7 @@ class Connection:
     def gg_data(self):
         reader = codecs.getreader("utf-8")
         response = urllib.request.urlopen(self.url)
-        data = ujson.load(reader(response))
+        data = json.load(reader(response))
         print('connected to gg url: '+self.url)
         return data
 
@@ -47,30 +41,46 @@ class Async_Connection:
     def __init__(self, urls):
         self.urls = urls
         self.data_list = []
-        self.i = 0
-        self.get_data(urls)
-
-
-
-
-    def tournaments(self, data):
-        return data['items']['entities']['tournament']
-
+        self.requests = 0
+        self.get_data()
 
     def handle_request(self, response):
-        print(self.i)
-        json_data = tornado.escape.json_decode(response.body)
-        tournaments = self.tournaments(json_data)
-        for tournament in tournaments:
-            self.data_list.append(tournament)
-        self.i -= 1
-        if self.i == 0:
-            ioloop.IOLoop.instance().stop()
+        self.requests -= 1
+        if(response.body is not None):
+            json_data = tornado.escape.json_decode(response.body)
+            self.data_list.append(json_data)
 
-    def get_data(self, urls):
+        if self.requests == 0:
+            ioloop.IOLoop.instance().stop()
+            #return self.data_list
+
+    def get_data(self):
         http_client = httpclient.AsyncHTTPClient()
 
-        for url in urls:
-            self.i += 1
+        for url in self.urls:
+            self.requests += 1
             response = http_client.fetch(url.strip(), self.handle_request)
+        ioloop.IOLoop.instance().start()
+
+class Phase_Connection:
+    def __init__(self, tournaments):
+        self.tournaments = tournaments
+        self.data_dict = {}
+        self.requests = multiprocessing.Queue()
+        self.get_data()
+
+    def handle_request(self, response):
+        tid = self.requests.get()
+        if(response.body is not None):
+            json_data = tornado.escape.json_decode(response.body)
+            self.data_dict[tid] = json_data
+
+        if self.requests.qsize() == 0:
+            ioloop.IOLoop.instance().stop()
+
+    def get_data(self):
+        http_client = httpclient.AsyncHTTPClient()
+        for tournament in self.tournaments:
+            self.requests.put(self.tournaments[tournament].tid)
+            response = http_client.fetch(self.tournaments[tournament].phase_groups_url.strip(), self.handle_request)
         ioloop.IOLoop.instance().start()

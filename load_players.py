@@ -1,28 +1,31 @@
-import json
-import codecs
-import urllib.parse
-import urllib.request
-import time
-import sqlite3
-import time
+import gg
+import melee
 
-conn = sqlite3.connect('melee.sqlite')
-cur = conn.cursor()
-reader = codecs.getreader("utf-8")
+class Player_Loader():
+    def __init__(self, tournaments):
+        self.tournaments = tournaments
+        self.players = {}
 
-Players = {}
-Entrants = []
-rip_counter = 0
+    def get_entrant_pages(self):
+        entrant_pages = []
+        for tournament in self.tournaments:
+            for entrant_page in self.tournaments[tournament].entrants:
+                entrant_pages.append(entrant_page)
+        return entrant_pages
 
-with open("groups.txt", "r") as text:
-    start_time = time.time()
-    for line in text:
-        print(line)
-        response = urllib.request.urlopen(line)
-        data = json.load(reader(response))
-        if 'entrants' in data['entities']:
-            for entrant in data['entities']['entrants']:
-                if entrant['id'] not in Players:
+    def get_player_urls(self):
+        urls = []
+        for player in self.players.values():
+            urls.append('https://api.smash.gg/player/{0}'.format(player))
+        return urls
+
+    def format_string(self, string):
+        if string is not None: return string.replace(' ', '_')
+
+    def get_players(self, player_data):
+        if 'entrants' in player_data['entities']:
+            for entrant in player_data['entities']['entrants']:
+                if entrant['id'] not in self.players:
                     entrant_id = (entrant['id'])
                     participant = entrant['participantIds'][0]
                     try:
@@ -30,13 +33,32 @@ with open("groups.txt", "r") as text:
                             player = entrant['playerIds'][str(participant)]
                         else:
                             player = entrant['playerIds'][0]
-                        Players[entrant_id] = player
-                        print('{0} {1}'.format(entrant_id, Players[entrant_id]))
+                        self.players[entrant_id] = player
+                        #print('{0} {1}'.format(entrant_id, self.players[entrant_id]))
                     except:
-                        print("rip")
-                        rip_counter+=1
+                        print("Player could not be loaded")
 
-    with codecs.open('playersbyid.txt', 'w', encoding='utf-8') as out:
-        for participant in Players:
-            out.write('{0} {1}'.format(participant, Players[participant])+'\n')
-    print('finished in: {0} with {1} rips'.format(time.time() - start_time, rip_counter))
+    def load_players(self):
+        print('loading players...')
+        connection = gg.Async_Connection(self.get_entrant_pages())
+        entrant_data = connection.data_list
+        for entrant_page in entrant_data:
+            self.get_players(entrant_page)
+        return self.create_players()
+
+    def create_players(self):
+        print("Creating players...")
+        connection = gg.Async_Connection(self.get_player_urls(), True)
+        player_data = connection.data_list
+        for player in player_data:
+            if(player is not None):
+                player_entity = player['entities']['player']
+                player_id = player_entity['id']
+                tag = self.format_string(player_entity['gamerTag'])
+                prefix = self.format_string(player_entity['prefix'])
+                state = player_entity['state']
+                country = self.format_string(player_entity['country'])
+                player = melee.Player(player_id, tag, prefix, state, country)
+                self.players[player_id] = player
+                print(player.to_string())
+        return self.players

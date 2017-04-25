@@ -6,16 +6,12 @@ import time
 import sqlite3
 import time
 
-conn = sqlite3.connect('melee.sqlite')
-cur = conn.cursor()
-reader = codecs.getreader("utf-8")
-
 Players = {}
 Sets = []
 rip_counter = 0
 
 def load_players ():
-    with open("playersbyid.txt") as text:
+    with open("text/playersbyid.txt") as text:
         for line in text:
             splitline = str.split(line)
             entrant = int(splitline[0])

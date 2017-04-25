@@ -38,11 +38,9 @@ def load_players():
         player_id = player_entity['id']
         tag = format_string(player_entity['gamerTag'])
         prefix = format_prefix(player_entity['prefix'])
-        twitter_handle = player_entity['twitterHandle']
-        twitch_stream = player_entity['twitchStream']
         state = player_entity['state']
         country = format_string(player_entity['country'])
-        player_string = '{0} {1} {2} {3} {4} {5} {6}'.format(player_id, tag, prefix, state, country, twitter_handle, twitch_stream)
+        player_string = '{0} {1} {2} {3} {4}'.format(player_id, tag, prefix, state, country)
         PlayerStrings.append(player_string)
         print(player_string)
         #Player_Dict[player_id] = tag

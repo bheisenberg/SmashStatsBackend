@@ -6,8 +6,9 @@ import time
 import sqlite3
 import time
 import Elo
+import os
 
-db = 'C:/Users/Brian/Source/Repos/SmashStats/SmashStats/bin/Debug/Resources/melee.sqlite'
+db = os.path.expanduser('~/documents/smashstats/db/melee.sqlite')
 conn = sqlite3.connect(db)
 cur = conn.cursor()
 
@@ -101,7 +102,7 @@ def loser(x, y):
 
 def populate_players():
     print("Loading players...")
-    with open('playerdict.txt', 'r', encoding='utf-8') as playerdict:
+    with open('text/playerdict.txt', 'r', encoding='utf-8') as playerdict:
         for line in playerdict:
             split_line = line.split()
             if len(split_line) > 1:
@@ -120,7 +121,7 @@ def populate_players():
 
 def populate_tournaments():
     print("Loading tournaments...")
-    with open('tournaments.txt', 'r', encoding='utf-8') as tournaments:
+    with open('text/tournaments.txt', 'r', encoding='utf-8') as tournaments:
         for line in tournaments:
             tournament_name = line.split()[1]
             tournament_date = line.split()[2]
@@ -134,7 +135,7 @@ def populate_tournaments():
 
 def populate_sets():
     print("Loading sets...")
-    with open('sets.txt', 'r', encoding='utf-8') as sets:
+    with open('text/sets.txt', 'r', encoding='utf-8') as sets:
         for line in sets:
             if len(line.split()) > 3:
                 entrant_1_id = line.split()[0]

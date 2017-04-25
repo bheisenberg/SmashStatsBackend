@@ -28,11 +28,25 @@ class TournamentSet:
 
 
 class Tournament:
-    def __init__(self, name, phase_groups_slug, entrants_slug, date, tid):
+    def __init__(self, tid, name, date, phase_groups_url, entrants_url):
         self.tid = tid
         self.name = name
         self.date = date
-        self.phase_groups_url = '{0}{1}'.format(gg.api, phase_groups_slug)
-        self.entrants_url = '{0}{1}'.format(gg.api, entrants_slug)
+        self.phase_groups_url = phase_groups_url
+        self.entrants_url = entrants_url
+        self.phase_groups = []
+        self.entrants = []
+
+class Player:
+    def __init__(self, pid, tag, prefix, state, country):
+        self.pid = pid
+        self.tag = tag
+        self.prefix = prefix
+        self.state = state
+        self.country = country
+
+    def to_string(self):
+        return '{0} {1} {2} {3} {4}'.format(self.pid, self.tag, self.prefix, self.state, self.country)
+
 
 
