@@ -9,15 +9,19 @@ class Player_Loader():
 
     def get_entrant_pages(self):
         entrant_pages = []
-        for tournament in self.tournaments:
-            for entrant_page in self.tournaments[tournament].entrants:
-                entrant_pages.append(entrant_page)
+        with open('text/entrant_pages.txt', 'w', encoding='utf-8') as text:
+            for tournament in self.tournaments.values():
+                for entrant_page in tournament.entrant_pages:
+                    text.write('{0}\n'.format(entrant_page))
+                    entrant_pages.append(entrant_page)
         return entrant_pages
 
     def get_player_urls(self, entrants):
         urls = []
-        for player in entrants.values():
-            urls.append('https://api.smash.gg/player/{0}'.format(player))
+        with open('text/player_urls.txt', 'w', encoding='utf-8') as text:
+            for player in entrants.values():
+                text.write('https://api.smash.gg/player/{0}\n'.format(player))
+                urls.append('https://api.smash.gg/player/{0}'.format(player))
         return urls
 
     def format_string(self, string):
@@ -32,7 +36,8 @@ class Player_Loader():
     def create_entrants_dict(self):
         entrants = {}
         print('loading entrants...')
-        connection = smash_gg_connector.Async_Connection(self.get_entrant_pages())
+        entrant_pages = self.get_entrant_pages()
+        connection = smash_gg_connector.Async_Connection(entrant_pages)
         entrant_data = connection.data_list
         for entrant_page in entrant_data:
             if self.has_entrants(entrant_page):
@@ -60,6 +65,4 @@ class Player_Loader():
             country = self.format_string(player_entity['country'])
             player = melee.Player(player_id, tag, prefix, state, country)
             self.players[player_id] = player
-        for player in self.players.values():
-            print(player.to_string())
         return self.players

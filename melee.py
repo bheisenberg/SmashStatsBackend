@@ -24,8 +24,8 @@ class Tournament:
         self.date = date
         self.phase_groups_url = phase_groups_url
         self.entrants_url = entrants_url
-        self.phase_groups = []
-        self.entrants = []
+        self.set_pages = []
+        self.entrant_pages = []
 
 class Player:
     def __init__(self, pid, tag, prefix, state, country):

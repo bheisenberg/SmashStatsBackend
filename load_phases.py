@@ -6,7 +6,8 @@ class Group_Loader:
         self.tournaments = tournaments
 
     def load_phases(self):
-        updated_tournaments = self.tournaments
+        tournaments = self.tournaments
+        count = 0
         print('loading phases...')
         connection = smash_gg_connector.Phase_Connection(self.tournaments)
         phases = connection.data_dict
@@ -14,12 +15,20 @@ class Group_Loader:
             phase = phases[tid]
             if phase['total_count'] > 1:
                 for group in phase['items']['entities']['groups']:
-                    entrants_url = 'http://api.smash.gg/phase_group/{0}?expand[]=entrants'.format(group['id'])
-                    phase_groups_url = 'http://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group['id'])
-                    self.tournaments[tid].entrants.append(entrants_url)
-                    self.tournaments[tid].phase_groups.append(phase_groups_url)
+                    group_id = group['id']
+                    entrants_url = 'http://api.smash.gg/phase_group/{0}?expand[]=entrants'.format(group_id)
+                    sets_url = 'http://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
+                    tournaments[tid].entrant_pages.append(entrants_url)
+                    tournaments[tid].set_pages.append(sets_url)
+                    count+=1
+                    #print(phase_groups_url)
             elif ['total_count'] == 1:
-                item = data['items']['entities']['groups']['id']
-                self.tournaments[tid].entrants.append('http://api.smash.gg/phase_group/{0}?expand[]=entrants'.format(item))
-                self.tournaments[tid].phase_groups.append('http://api.smash.gg/phase_group/{0}?expand[]=sets'.format(item))
-        return self.tournaments
+                group_id = phase['items']['entities']['groups']['id']
+                entrants_url = 'http://api.smash.gg/phase_group/{0}?expand[]=entrants'.format(group_id)
+                sets_url = 'http://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
+                tournaments[tid].entrant_pages.append(entrants_url)
+                tournaments[tid].set_pages.append(sets_url)
+                count+=1
+                #print(phase_groups_url)
+        print('loaded {0} phases'.format(count))
+        return tournaments
