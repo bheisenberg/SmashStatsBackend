@@ -9,10 +9,10 @@ tournament_loader = load_tournaments.Tournament_Loader(container)
 tournaments = tournament_loader.load_tournaments()
 
 phase_loader = load_phases.Group_Loader(tournaments)
-tournaments = phase_loader.load_phases()
+phases = phase_loader.load_phases()
 
-player_loader = load_players.Player_Loader(tournaments)
-players = player_loader.create_entrants_dict()
+player_loader = load_players.Player_Loader(phases)
+players = player_loader.load_players()
 
 
 

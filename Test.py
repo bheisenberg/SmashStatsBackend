@@ -1,45 +1,48 @@
-import json
-import urllib.parse
-import urllib.request
-import codecs
-import json
-from tornado import ioloop, httpclient, escape
-import tornado
-import requests.sessions
-import smash_gg_connector
-
-#url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
-reader = codecs.getreader("utf-8")
-#response = urllib.request.urlopen(url)
-
-def get_urls():
-    x = 1
-    urls = []
-    while (x < 43):
-        url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page={0}&per_page={1}'.format(x, 100)
-        urls.append(url)
-        x+=1
-    return urls
-
-i = 0
+import grequests
+import melee
 
 
-def handle_request(response):
-    json_data = tornado.escape.json_decode(response.body)
-    tournaments = smash_gg_connector.tournaments(json_data)
-    for tournament in tournaments:
-        print(tournament['name'])
-    global i
-    i -= 1
-    if i == 0:
-        ioloop.IOLoop.instance().stop()
-
-http_client = httpclient.AsyncHTTPClient()
-
-for url in get_urls():
-    i += 1
-    response = http_client.fetch(url.strip(), handle_request)
-
-ioloop.IOLoop.instance().start()
+def format_string(self, string):
+    if string is not None: return string.replace(' ', '_')
 
 
+def has_entrants(entrant_data):
+    return 'entrants' in entrant_data['entities']
+
+
+def get_entrants(entrant_data):
+    return entrant_data['entities']['entrants']
+
+def parse_entrant(r, **kwargs):
+    entrants_dict = {}
+    # print('loading entrants... from {0} phases'.format(len(self.phases)))
+    # entrant_pages = self.get_entrant_pages()
+    print(r.url)
+    print(r.json())
+    entrant_page = r.json
+
+    entities = entrant_page['entities']
+    if 'entrants' in entities:
+        print('has entrants')
+        entrants = entities['entrants']
+        players = entities['player']
+        for entrant, player in zip(entrants, players):
+            entrant_id = entrant['id']
+            player_id = player['id']
+            tag = format_string(player['gamerTag'])
+            prefix = format_string(player['prefix'])
+            state = player['state']
+            country = format_string(player['country'])
+            player = melee.Player(player_id, tag, prefix, state, country)
+            players[entrant_id] = player
+            print(player.to_string())
+
+def load_players():
+    sites = []
+    urls = ['http://api.smash.gg/phase_group/117894?expand[]=entrants']
+    for u in urls:
+        rs = grequests.get(u, hooks=dict(response=parse_entrant))
+        sites.append(rs)
+    grequests.map(sites)
+
+load_players()

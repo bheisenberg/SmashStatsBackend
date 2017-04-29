@@ -2,11 +2,7 @@ import urllib.parse
 import urllib.request
 import json
 import codecs
-import tornado
-from tornado import ioloop, httpclient, escape
-import multiprocessing
 import grequests
-from grequests import post
 
 per_page = 100
 api = 'https://api.smash.gg/'
@@ -72,10 +68,13 @@ class Async_Connection:
         self.get_data()
 
     def get_data(self):
+        #count = 0
         rs = (grequests.get(url) for url in self.urls)
         results = grequests.map(rs)
         for result in results:
             if(result is not None):
+                #count+=1
+                #print('{0}: {1}'.format(count, result))
                 self.data_list.append(result.json())
 
 class Phase_Connection:
