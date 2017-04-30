@@ -39,36 +39,50 @@ class Player_Loader():
 
     def load_players(self):
         urls = self.phases
-        sites = []
-        for u in urls:
-            rs = grequests.get(u, hooks=dict(response=self.parse_entrant_page))
-            sites.append(rs)
-        grequests.map(sites)
-        print(len(self.players))
+        rs = (grequests.get(url) for url in urls)
+        response = grequests.map(rs)
+        for item in response:
+            if item is not None:
+                entrant_page = item.json()
+                entities = entrant_page['entities']
+                if('entrants' in entities):
+                    entrants = entities['entrants']
+                    players = entities['player']
+                    for entrant, player in zip(entrants, players):
+                        entrant_id = entrant['id']
+                        player_id = player['id']
+                        tag = self.format_string(player['gamerTag'])
+                        prefix = self.format_string(player['prefix'])
+                        state = player['state']
+                        country = self.format_string(player['country'])
+                        melee_player = melee.Player(player_id, tag, prefix, state, country)
+                        self.players[entrant_id] = melee_player
+                        print(melee_player.to_string())
+        print('Found {0} players'.format(len(self.players)))
         return self.players
 
     def parse_entrant_page(self, r, **kwargs):
-        entrants_dict = {}
+        #entrants_dict = {}
         #print('loading entrants... from {0} phases'.format(len(self.phases)))
         #entrant_pages = self.get_entrant_pages()
         #print(r.url)
-        print(r.url)
+        #print(r.url)
+        print(r)
         entrant_page = r.json()
         entities = entrant_page['entities']
-        if 'entrants' in entities:
-            print('has entrants')
-            entrants = entities['entrants']
-            players = entities['player']
-            for entrant, player in zip(entrants, players):
-                entrant_id = entrant['id']
-                player_id = player['id']
-                tag = self.format_string(player['gamerTag'])
-                prefix = self.format_string(player['prefix'])
-                state = player['state']
-                country = self.format_string(player['country'])
-                player = melee.Player(player_id, tag, prefix, state, country)
-                self.players[entrant_id] = player
-                print(player.to_string())
+        entrants = entities['entrants']
+        players = entities['player']
+        for entrant, player in zip(entrants, players):
+            entrant_id = entrant['id']
+            player_id = player['id']
+            tag = self.format_string(player['gamerTag'])
+            prefix = self.format_string(player['prefix'])
+            state = player['state']
+            country = self.format_string(player['country'])
+            melee_player = melee.Player(player_id, tag, prefix, state, country)
+            self.players[entrant_id] = melee_player
+            print(melee_player.to_string())
+        return self.players
 
 '''def create_players(self, entrants):
     print("Creating players...")

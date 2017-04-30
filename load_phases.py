@@ -23,8 +23,8 @@ class Group_Loader:
         if phase['total_count'] > 1:
             for group in phase['items']['entities']['groups']:
                 group_id = group['id']
-                entrants_url = 'http://api.smash.gg/phase_group/{0}?expand[]=entrants'.format(group_id)
-                sets_url = 'http://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
+                entrants_url = 'https://api.smash.gg/phase_group/{0}?expand[]=entrants&per_page=100'.format(group_id)
+                sets_url = 'https://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
                 #print(entrants_url)
                 #tournaments[tid].entrant_pages.append(entrants_url)
                 #tournaments[tid].set_pages.append(sets_url)
@@ -32,8 +32,8 @@ class Group_Loader:
                 #print(phase_groups_url)
         elif ['total_count'] == 1:
             group_id = phase['items']['entities']['groups']['id']
-            entrants_url = 'http://api.smash.gg/phase_group/{0}?expand[]=entrants'.format(group_id)
-            sets_url = 'http://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
+            entrants_url = 'https://api.smash.gg/phase_group/{0}?expand[]=entrants&per_page=100'.format(group_id)
+            sets_url = 'https://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
             #tournaments[tid].entrant_pages.append(entrants_url)
             #tournaments[tid].set_pages.append(sets_url)
             #print(entrants_url)

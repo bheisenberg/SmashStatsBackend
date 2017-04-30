@@ -64,11 +64,11 @@ class Tournament_Loader:
     def load_tournaments(self):
         pages = smash_gg_connector.Connection(base_url).pages
         urls = self.get_urls(pages)
-        sites = []
-        for u in urls:
-            rs = grequests.get(u, hooks=dict(response=self.parse_tournament))
-            sites.append(rs)
-        grequests.map(sites)
+        requests = []
+        for url in urls:
+            rs = grequests.get(url, hooks=dict(response=self.parse_tournament))
+            requests.append(rs)
+        result = grequests.map(requests)
         print(len(self.urls))
         print(len(self.phases))
         return self.phases
