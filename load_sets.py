@@ -62,7 +62,7 @@ def parse_set_page (r):
                     entrant1_score = set_obj['entrant1Score']
                     entrant2_score = set_obj['entrant2Score']
                     new_set = melee.TournamentSet(entrant1, entrant1_score, entrant2, entrant2_score)
-                    print(new_set.to_string())
+                    #print(new_set.to_string())
                     if(new_set not in tournament_dict[r.url].sets):
                         tournament_dict[r.url].sets.append(new_set)
                 except:
