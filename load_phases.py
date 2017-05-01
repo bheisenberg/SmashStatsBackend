@@ -1,41 +1,41 @@
 #Created by Brian Eisenberg 4/25/2017
-import smash_gg_connector
 import grequests
+import requests
+import melee
 
 class Group_Loader:
     def __init__(self, tournaments):
         self.tournaments = tournaments
-        self.phase_list = []
+        self.phase_list = {}
         #self.phases = []
 
+    def exception_handler(self, request, exception):
+        print(exception)
+
     def load_phases(self):
-        urls = self.tournaments
-        sites = []
-        for u in urls:
-            rs = grequests.get(u, hooks=dict(response=self.parse_phase))
-            sites.append(rs)
-        grequests.map(sites)
+        urls = self.tournaments.keys()
+        session = requests.Session()
+        rs = (grequests.get(url, session=session) for url in urls)
+        for r in grequests.imap(rs, exception_handler=self.exception_handler, size=200):
+            self.parse_phase(r)
         print(len(self.phase_list))
-        return self.phase_list
+        return self.tournaments.values()
+
 
     def parse_phase(self, r, **kwargs):
-        phase = r.json()
-        if phase['total_count'] > 1:
-            for group in phase['items']['entities']['groups']:
-                group_id = group['id']
-                entrants_url = 'https://api.smash.gg/phase_group/{0}?expand[]=entrants&per_page=100'.format(group_id)
-                sets_url = 'https://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
-                #print(entrants_url)
-                #tournaments[tid].entrant_pages.append(entrants_url)
-                #tournaments[tid].set_pages.append(sets_url)
-                self.phase_list.append(entrants_url)
-                #print(phase_groups_url)
-        elif ['total_count'] == 1:
-            group_id = phase['items']['entities']['groups']['id']
-            entrants_url = 'https://api.smash.gg/phase_group/{0}?expand[]=entrants&per_page=100'.format(group_id)
-            sets_url = 'https://api.smash.gg/phase_group/{0}?expand[]=sets'.format(group_id)
-            #tournaments[tid].entrant_pages.append(entrants_url)
-            #tournaments[tid].set_pages.append(sets_url)
-            #print(entrants_url)
-            self.phase_list.append(entrants_url)
-            #print(phase_groups_url
+        url = r.url
+        print(url)
+        phase_page = r.json()
+        if(phase_page['total_count'] > 0):
+            result_object = phase_page['items']['result']
+            phase_ids = []
+            if(type(result_object) == list):
+                for result in result_object:
+                    print(result)
+                    phase_ids.append(result)
+            else:
+                print(result_object)
+                phase_ids.append(result_object)
+            self.tournaments[url].phase_ids.extend(phase_ids)
+
+

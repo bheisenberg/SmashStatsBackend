@@ -2,15 +2,13 @@
 import melee
 import smash_gg_connector
 import grequests
+import requests
 
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
 
 
-
-
 class Tournament_Loader:
-    def __init__(self, container):
-        self.container = container
+    def __init__(self):
         self.pages = 2
         self.tournaments = {}
         self.phases = []
@@ -44,8 +42,20 @@ class Tournament_Loader:
             x += 1
         return urls
 
-    def parse_tournament(self, r, **kwargs):
-        self.urls.append(r.url)
+    def exception_handler(self):
+        print('request failed')
+
+    def load_tournaments(self):
+        pages = smash_gg_connector.Connection(base_url).pages
+        urls = self.get_urls(pages)
+        session = requests.Session()
+        rs = (grequests.get(url, session=session) for url in urls)
+        for r in grequests.imap(rs, exception_handler=self.exception_handler, size=200):
+            self.parse_tournament(r)
+        print(len(self.phases))
+        return self.tournaments
+
+    def parse_tournament(self, r):
         tournament_page = self.get_tournaments(r.json())
         for tournament in tournament_page:
             if (self.valid_tournament(tournament)):
@@ -53,25 +63,13 @@ class Tournament_Loader:
                 tid = str(tournament['id'])
                 slug = self.melee_slug(tournament)
                 date = tournament['startAt']
-                phase_url = smash_gg_connector.phase(slug)
-                self.phases.append(phase_url)
-                entrants_url = smash_gg_connector.entrants(slug)
-                melee_tournament = melee.Tournament(tid, name, date, phase_url, entrants_url)
-                self.tournaments[tid] = melee_tournament
+                phase_groups_url = smash_gg_connector.phase(slug)
+                melee_tournament = melee.Tournament(tid, name, date)
+                self.tournaments[phase_groups_url] = melee_tournament
                 print('{0} added to tournaments'.format(name))
 
 
-    def load_tournaments(self):
-        pages = smash_gg_connector.Connection(base_url).pages
-        urls = self.get_urls(pages)
-        requests = []
-        for url in urls:
-            rs = grequests.get(url, hooks=dict(response=self.parse_tournament))
-            requests.append(rs)
-        result = grequests.map(requests)
-        print(len(self.urls))
-        print(len(self.phases))
-        return self.phases
+
 
     '''def load_tournaments(self):
         print('loading tournaments')

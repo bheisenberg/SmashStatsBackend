@@ -6,7 +6,7 @@ import grequests
 
 per_page = 100
 api = 'https://api.smash.gg/'
-phase_endpoint = '/phase_groups?expand=[]groups&per_page=100'
+phase_endpoint = '/phase_groups?expand=[]groups'
 entrants_endpoint = '/standings?expand[0]=entrants'
 
 def phase(slug):

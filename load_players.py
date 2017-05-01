@@ -2,22 +2,30 @@
 import smash_gg_connector
 import melee
 import grequests
+import requests
+
+class Player_Container():
+    def __init__(self, player_dict, player_list):
+        self.player_dict = player_dict
+        self.player_list = player_list
+
 
 class Player_Loader():
-    def __init__(self, phases):
-        self.phases = phases
+    def __init__(self, tournaments):
+        self.tournaments = tournaments
         self.players = {}
+        self.player_list = []
+
+    def get_entrant_page(self, entrant_id):
+        head = 'https://api.smash.gg/phase_group/'
+        tail = '?expand[]=entrants'
+        return '{0}{1}{2}'.format(head, entrant_id, tail)
 
     def get_entrant_pages(self):
         entrant_pages = []
-        #with open('text/entrant_pages.txt', 'w', encoding='utf-8') as text:
-            #for tournament in self.tournaments.values():
-                #for entrant_page in tournament.entrant_pages:
-                    #text.write('{0}\n'.format(entrant_page))
-                    #entrant_pages.append(entrant_page)
-        #for phase in self.phases:
-
-
+        for tournament in self.tournaments:
+            for phase_id in tournament.phase_ids:
+                entrant_pages.append(self.get_entrant_page(phase_id))
         return entrant_pages
 
     def get_player_urls(self, entrants):
@@ -37,52 +45,38 @@ class Player_Loader():
     def get_entrants(self, entrant_data):
         return entrant_data['entities']['entrants']
 
-    def load_players(self):
-        urls = self.phases
-        rs = (grequests.get(url) for url in urls)
-        response = grequests.map(rs)
-        for item in response:
-            if item is not None:
-                entrant_page = item.json()
-                entities = entrant_page['entities']
-                if('entrants' in entities):
-                    entrants = entities['entrants']
-                    players = entities['player']
-                    for entrant, player in zip(entrants, players):
-                        entrant_id = entrant['id']
-                        player_id = player['id']
-                        tag = self.format_string(player['gamerTag'])
-                        prefix = self.format_string(player['prefix'])
-                        state = player['state']
-                        country = self.format_string(player['country'])
-                        melee_player = melee.Player(player_id, tag, prefix, state, country)
-                        self.players[entrant_id] = melee_player
-                        print(melee_player.to_string())
-        print('Found {0} players'.format(len(self.players)))
-        return self.players
+    def exception_handler(self, request, exception):
+        print(exception)
 
-    def parse_entrant_page(self, r, **kwargs):
-        #entrants_dict = {}
-        #print('loading entrants... from {0} phases'.format(len(self.phases)))
-        #entrant_pages = self.get_entrant_pages()
-        #print(r.url)
-        #print(r.url)
-        print(r)
+    def load_players(self):
+        urls = self.get_entrant_pages()
+        session = requests.Session()
+        rs = (grequests.get(url, session=session) for url in urls)
+        for r in grequests.imap(rs, exception_handler=self.exception_handler, size=200):
+            self.parse_entrant_page(r)
+        print(len(self.players))
+        return Player_Container(self.players, self.player_list)
+
+    def parse_entrant_page(self, r):
+        print(r.url)
         entrant_page = r.json()
         entities = entrant_page['entities']
-        entrants = entities['entrants']
-        players = entities['player']
-        for entrant, player in zip(entrants, players):
-            entrant_id = entrant['id']
-            player_id = player['id']
-            tag = self.format_string(player['gamerTag'])
-            prefix = self.format_string(player['prefix'])
-            state = player['state']
-            country = self.format_string(player['country'])
-            melee_player = melee.Player(player_id, tag, prefix, state, country)
-            self.players[entrant_id] = melee_player
-            print(melee_player.to_string())
-        return self.players
+        if 'entrants' in entities:
+            print('has entrants')
+            entrants = entities['entrants']
+            players = entities['player']
+            for entrant, player in zip(entrants, players):
+                entrant_id = entrant['id']
+                player_id = player['id']
+                tag = self.format_string(player['gamerTag'])
+                prefix = self.format_string(player['prefix'])
+                state = player['state']
+                country = self.format_string(player['country'])
+                melee_player = melee.Player(player_id, tag, prefix, state, country)
+                self.players[entrant_id] = melee_player
+                if not melee_player in self.player_list:
+                    self.player_list.append(melee_player)
+                print(melee_player.to_string())
 
 '''def create_players(self, entrants):
     print("Creating players...")
