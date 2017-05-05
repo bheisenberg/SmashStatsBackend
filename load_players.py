@@ -13,7 +13,7 @@ class Player_Container():
 class Player_Loader():
     def __init__(self, phases):
         self.phases = phases
-        self.players = {}
+        self.player_dict = {}
         self.player_list = []
 
     def get_entrant_page(self, entrant_id):
@@ -53,8 +53,8 @@ class Player_Loader():
         rs = (grequests.get(url, session=session) for url in urls)
         for r in grequests.imap(rs, exception_handler=self.exception_handler, size=200):
             self.parse_entrant_page(r)
-        print(len(self.players))
-        return Player_Container(self.players, self.player_list)
+        print(len(self.player_dict))
+        return Player_Container(self.player_dict, self.player_list)
 
     def parse_entrant_page(self, r):
         print(r.url)
@@ -72,10 +72,10 @@ class Player_Loader():
                 state = player['state']
                 country = self.format_string(player['country'])
                 melee_player = melee.Player(player_id, tag, prefix, state, country)
-                self.players[entrant_id] = melee_player
+                self.player_dict[entrant_id] = melee_player
                 if not melee_player in self.player_list:
                     self.player_list.append(melee_player)
-                #print(melee_player.to_string())
+                print(melee_player.to_string())
 
 '''def create_players(self, entrants):
     print("Creating players...")

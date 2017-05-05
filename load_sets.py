@@ -4,8 +4,9 @@ import melee
 
 player_dict = {}
 phase_sets = []
+sets = []
 
-class set_page:
+class Set_page:
     def __init__(self, set_page, tid):
         self.set_page = set_page
         self.tid = tid
@@ -19,7 +20,7 @@ def get_set_page(set_id):
 def get_set_pages(phases):
     set_pages = []
     for phase in phases:
-        set_pages.append(set_page(get_set_page(phase.phase_id), phase.tid))
+        set_pages.append(Set_page(get_set_page(phase.phase_id), phase.tid))
     return set_pages
 
 def exception_handler(request, exception):
@@ -33,8 +34,8 @@ def load_sets (players, phases):
     set_pages = get_set_pages(phases)
     session = requests.Session()
     rs = (grequests.get(url.set_page, session=session) for url in set_pages)
-    for r, set_page.tid in zip(grequests.imap(rs, exception_handler=exception_handler, size=200), set_pages):
-        parse_set_page(r, set_page.tid)
+    for r, Set_page.tid in zip(grequests.imap(rs, exception_handler=exception_handler, size=200), set_pages):
+        parse_set_page(r, Set_page.tid)
     return sets
 
 def valid_set(set_obj):

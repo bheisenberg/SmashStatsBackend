@@ -1,5 +1,7 @@
 import sqlite3
-db = 'C:/users/Brian/Desktop/melee.sqlite'
+import os
+
+db = os.path.expanduser("~/Desktop/melee.sqlite")
 
 def update_player_elo():
     conn = sqlite3.connect(db)
@@ -23,7 +25,7 @@ class Tournament:
 
 class Player:
     def __init__(self):
-        self.elo = 1000
+        self.elo = 1200
         self.games = 0
         self.k = 40
         self.master = False
@@ -45,6 +47,9 @@ class Elo:
     def e_a (self, win_elo, loss_elo):
         return 1 / (1 + pow (10, (loss_elo - win_elo) / 400))
 
+    def e(self, elo):
+        return pow(10, elo/400)
+
 
     def Save_Record(self, record):
         player = 'Armada'
@@ -60,37 +65,40 @@ class Elo:
         players = {}
         record = []
         for set in self.sets:
-            if (set[0] is not None and set[1] is not None) and (set[0] != 'None' and set[1] != 'None'):
-                winner_id = set[0]
-                loser_id = set[1]
-                winner = Player() if not (winner_id in players) else players[winner_id]
-                loser = Player() if not (loser_id in players) else players[loser_id]
+            winner_id = set[0]
+            loser_id = set[1]
+            winner = Player() if not (winner_id in players) else players[winner_id]
+            loser = Player() if not (loser_id in players) else players[loser_id]
 
-                #dif = abs(winner.elo - loser.elo)
-                ea = self.e_a(winner.elo, loser.elo)
-                eb = 1-ea
-                win_elo = int(winner.calculate_k() * eb)
-                loss_elo = int(loser.calculate_k() * eb)
-                #print(winner.k/c)
-                winner.elo += win_elo
-                loser.elo -= loss_elo
-                winner.games += 1
-                loser.games += 1
-                players[winner_id] = winner
-                players[loser_id] = loser
-                #print(winner_id)
-                #print(loser_id)
-                record.append('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
-                record.append('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
-                print('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
-                print('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
-                #num += 1
+            #dif = abs(winner.elo - loser.elo)
+            #ea = self.e_a(winner.elo, loser.elo)
+            #eb = 1-ea
+            win_e = self.e(winner.elo)
+            loss_e = self.e(loser.elo)
+            e_win = win_e / (win_e + loss_e)
+            e_loss = loss_e / (loss_e + win_e)
+            winner.elo = int(winner.elo + winner.k * (1 - e_win))
+            loser.elo = int(loser.elo + loser.k * (0 - e_loss))
+            #win_elo = int(winner.calculate_k() * eb)
+            #loss_elo = int(loser.calculate_k() * eb)
+            #print(winner.k/c)
+            #winner.elo += win_elo
+            #loser.elo -= loss_elo
+            winner.games += 1
+            loser.games += 1
+            players[winner_id] = winner
+            players[loser_id] = loser
+            #print(winner_id)
+            #print(loser_id)
+            #record.append('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
+            #record.append('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
+            #print('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
+            #print('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
+            #num += 1
         self.Save_Record(record)
         return players
 
 update_player_elo()
-
-
 
 
 
