@@ -10,7 +10,7 @@ base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per
 class Tournament_Loader:
     def __init__(self):
         self.pages = 2
-        self.tournaments = {}
+        self.tournaments = []
         self.phases = []
         self.urls = []
 
@@ -64,8 +64,8 @@ class Tournament_Loader:
                 slug = self.melee_slug(tournament)
                 date = tournament['startAt']
                 phase_groups_url = smash_gg_connector.phase(slug)
-                melee_tournament = melee.Tournament(tid, name, date)
-                self.tournaments[phase_groups_url] = melee_tournament
+                melee_tournament = melee.Tournament(tid, name, date, phase_groups_url)
+                self.tournaments.append(melee_tournament)
                 print('{0} added to tournaments'.format(name))
 
 

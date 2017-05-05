@@ -11,8 +11,8 @@ class Player_Container():
 
 
 class Player_Loader():
-    def __init__(self, tournaments):
-        self.tournaments = tournaments
+    def __init__(self, phases):
+        self.phases = phases
         self.players = {}
         self.player_list = []
 
@@ -23,9 +23,8 @@ class Player_Loader():
 
     def get_entrant_pages(self):
         entrant_pages = []
-        for tournament in self.tournaments:
-            for phase_id in tournament.phase_ids:
-                entrant_pages.append(self.get_entrant_page(phase_id))
+        for phase in self.phases:
+                entrant_pages.append(self.get_entrant_page(phase.phase_id))
         return entrant_pages
 
     def get_player_urls(self, entrants):

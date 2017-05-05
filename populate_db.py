@@ -2,7 +2,7 @@ import sqlite3
 
 db = 'C:/users/Brian/Desktop/melee.sqlite'
 
-def populate(tournaments, players):
+def populate(tournaments, players, sets):
     conn = sqlite3.connect(db)
     cursor = conn.cursor()
     create_tables(cursor)
@@ -13,11 +13,11 @@ def populate(tournaments, players):
         cursor.execute(''' INSERT OR IGNORE INTO Tournament (tournament_id, tournament_name, tournament_date)
             VALUES (?, ?, datetime(?, 'unixepoch', 'localtime'))''',
                     (tournament.tid, tournament.name, tournament.date))
-        for tournament_set in tournament.sets:
-            cursor.execute(''' INSERT OR IGNORE INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id)
-            VALUES ( ?, ?, ?, ?, ?, ?, ? )''', (
-            tournament_set.entrant_1_id, tournament_set.entrant_1_score, tournament_set.entrant_2_id,
-            tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament.tid))
+    for tournament_set in sets:
+        cursor.execute(''' INSERT OR IGNORE INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id)
+        VALUES ( ?, ?, ?, ?, ?, ?, ? )''', (
+        tournament_set.entrant_1_id, tournament_set.entrant_1_score, tournament_set.entrant_2_id,
+        tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament_set.tid))
     conn.commit()
     conn.close()
 
