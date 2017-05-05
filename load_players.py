@@ -61,7 +61,7 @@ class Player_Loader():
         entrant_page = r.json()
         entities = entrant_page['entities']
         if 'entrants' in entities:
-            print('has entrants')
+            #print('has entrants')
             entrants = entities['entrants']
             players = entities['player']
             for entrant, player in zip(entrants, players):
@@ -75,7 +75,7 @@ class Player_Loader():
                 self.players[entrant_id] = melee_player
                 if not melee_player in self.player_list:
                     self.player_list.append(melee_player)
-                print(melee_player.to_string())
+                #print(melee_player.to_string())
 
 '''def create_players(self, entrants):
     print("Creating players...")

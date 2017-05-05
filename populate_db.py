@@ -1,6 +1,7 @@
 import sqlite3
+import os
 
-db = 'C:/users/Brian/Desktop/melee.sqlite'
+db = os.path.expanduser("~/Desktop/melee.sqlite")
 
 def populate(tournaments, players, sets):
     conn = sqlite3.connect(db)
