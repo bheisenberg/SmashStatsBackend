@@ -3,6 +3,7 @@ import melee
 import smash_gg_connector
 import grequests
 import requests
+import  time
 
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
 
@@ -10,7 +11,7 @@ base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per
 class Tournament_Loader:
     def __init__(self):
         self.pages = 2
-        self.tournaments = []
+        self.tournaments = {}
         self.phases = []
         self.urls = []
 
@@ -37,13 +38,12 @@ class Tournament_Loader:
         urls = []
         while (x < pages):
             url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page={0}&per_page={1}'.format(x, 100)
-            #print(url)
             urls.append(url)
             x += 1
         return urls
 
-    def exception_handler(self):
-        print('request failed')
+    def exception_handler(self, request, exception):
+        print(exception)
 
     def load_tournaments(self):
         pages = smash_gg_connector.Connection(base_url).pages
@@ -51,6 +51,7 @@ class Tournament_Loader:
         session = requests.Session()
         rs = (grequests.get(url, session=session) for url in urls)
         for r in grequests.imap(rs, exception_handler=self.exception_handler, size=200):
+            time.sleep(0.1)
             self.parse_tournament(r)
         print(len(self.phases))
         return self.tournaments
@@ -65,21 +66,5 @@ class Tournament_Loader:
                 date = tournament['startAt']
                 phase_groups_url = smash_gg_connector.phase(slug)
                 melee_tournament = melee.Tournament(tid, name, date, phase_groups_url)
-                self.tournaments.append(melee_tournament)
+                self.tournaments[phase_groups_url] = melee_tournament
                 print('{0} added to tournaments'.format(name))
-
-
-
-
-    '''def load_tournaments(self):
-        print('loading tournaments')
-        #start_time = time.time()
-        phase_groups = []
-        pages = smash_gg_connector.Connection(base_url).pages
-        self.async(self.get_urls(pages))
-        #connection = smash_gg_connector.Async_Connection(self.get_urls(pages))
-
-
-        tournament_pages = connection.data_list
-        for tournament_page in tournament_pages:
-            tournament_page = self.get_tournaments(tournament_page)'''

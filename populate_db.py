@@ -10,15 +10,15 @@ def populate(tournaments, players, sets):
     for player in players:
         cursor.execute(''' INSERT OR IGNORE INTO Player (player_id, tag, elo, prefix, state, country)
                     VALUES ( ?, ?, ?, ?, ?, ? )''', (player.pid, player.tag, 0, player.prefix, player.state, player.country))
-    for tournament in tournaments:
+    for tournament in tournaments.values():
         cursor.execute(''' INSERT OR IGNORE INTO Tournament (tournament_id, tournament_name, tournament_date)
             VALUES (?, ?, datetime(?, 'unixepoch', 'localtime'))''',
                     (tournament.tid, tournament.name, tournament.date))
     for tournament_set in sets:
-        cursor.execute(''' INSERT OR IGNORE INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id)
-        VALUES ( ?, ?, ?, ?, ?, ?, ? )''', (
+        cursor.execute(''' INSERT OR IGNORE INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id, url)
+        VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)''', (
         tournament_set.entrant_1_id, tournament_set.entrant_1_score, tournament_set.entrant_2_id,
-        tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament_set.tid))
+        tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament_set.tid, tournament_set.url))
     conn.commit()
     conn.close()
 
@@ -47,6 +47,7 @@ def create_tables(cursor):
         winner_id VARCHAR(20),
         loser_id VARCHAR(20),
         tournament_id INTEGER,
+        url VARCHAR(200),
         FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id)
         FOREIGN KEY (entrant_1_id) REFERENCES Player(player_id)
         FOREIGN KEY (entrant_2_id) REFERENCES Player(player_id)
