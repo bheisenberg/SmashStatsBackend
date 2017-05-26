@@ -19,6 +19,7 @@ class Connection:
     def __init__(self, url):
         self.url = url
         self.data = self.gg_data()
+        self.tournaments = self.get_tournaments()
         self.pages = self.get_pages()
 
     def gg_data(self):
@@ -28,34 +29,11 @@ class Connection:
         print('connected to gg url: '+self.url)
         return data
 
+    def get_tournaments(self):
+        return self.data['total_count']
+
     def get_pages (self):
-        pages = self.data['total_count']/per_page
-        return pages
-
-'''class Async_Connection:
-    def __init__(self, urls):
-        self.urls = urls
-        self.data_list = []
-        self.served = 0
-        self.requests = 0
-        self.get_data()
-
-    def handle_request(self, response):
-        self.requests -= 1
-        if(response is not None):
-            self.served += 1
-            json_data = tornado.escape.json_decode(response.body)
-            self.data_list.append(json_data)
-        if self.requests == 0:
-            print('served {0} http requests'.format(self.served))
-            ioloop.IOLoop.instance().stop()
-
-    def get_data(self):
-        http_client = httpclient.AsyncHTTPClient()
-        for url in self.urls:
-            self.requests += 1
-            response = httpj_client.fetch(url.strip(), self.handle_request)
-        ioloop.IOLoop.instance().start()'''
+        return self.tournaments/per_page
 
 
 def handle_url(response):
@@ -68,55 +46,8 @@ class Async_Connection:
         self.get_data()
 
     def get_data(self):
-        #count = 0
         rs = (grequests.get(url) for url in self.urls)
         results = grequests.map(rs)
         for result in results:
             if(result is not None):
-                #count+=1
-                #print('{0}: {1}'.format(count, result))
                 self.data_list.append(result.json())
-
-class Phase_Connection:
-    def __init__(self, tournaments):
-        self.tournaments = tournaments
-        self.data_dict = {}
-        self.served = 0
-        self.requests = 0
-        self.get_data()
-
-    def get_data(self):
-        keys = []
-        urls = []
-        for tournament in self.tournaments.values():
-            #print(tournament.phase_groups_url)
-            keys.append(tournament.tid)
-            urls.append(tournament.phase_groups_url)
-
-        rs = (grequests.get(url) for url in urls)
-        results = grequests.map(rs)
-        for x in range(0, len(results)):
-            if(results[x] is not None):
-                self.data_dict[keys[x]] = results[x].json()
-
-'''class Phase_Connection:
-    def __init__(self, tournaments):
-        self.tournaments = tournaments
-        self.data_dict = {}
-        self.requests = multiprocessing.Queue()
-        self.get_data()
-
-    def handle_request(self, response):
-        tid = self.requests.get()
-        if(response.body is not None):
-            json_data = tornado.escape.json_decode(response.body)
-            self.data_dict[tid] = json_data
-        if self.requests.qsize() == 0:
-            ioloop.IOLoop.instance().stop()
-
-    def get_data(self):
-        http_client = httpclient.AsyncHTTPClient()
-        for tournament in self.tournaments:
-            self.requests.put(self.tournaments[tournament].tid)
-            response = http_client.fetch(self.tournaments[tournament].phase_groups_url.strip(), self.handle_request)
-        ioloop.IOLoop.instance().start()'''
