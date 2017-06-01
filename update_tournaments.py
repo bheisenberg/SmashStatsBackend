@@ -8,6 +8,7 @@ import  time
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
 
 
+
 class Tournament_Loader:
     def __init__(self):
         self.pages = 2
@@ -45,6 +46,10 @@ class Tournament_Loader:
     def exception_handler(self, request, exception):
         print(exception)
 
+    def save_count(self, tournaments):
+        with open('save\save_data.txt', 'w') as file:
+            file.write(str(tournaments))
+
     def load_tournaments(self):
         connection = smash_gg_connector.Connection(base_url)
         tournaments = connection.tournaments
@@ -54,11 +59,12 @@ class Tournament_Loader:
         rs = (grequests.get(url, session=session) for url in urls)
         for r in grequests.imap(rs, exception_handler=self.exception_handler, size=200):
             time.sleep(0.1)
-            self.parse_tournament(r)
+            self.parse_tournament_page(r)
         print(len(self.phases))
+        self.save_count(tournaments)
         return self.tournaments
 
-    def parse_tournament(self, r):
+    def parse_tournament_page(self, r):
         tournament_page = self.get_tournaments(r.json())
         for tournament in tournament_page:
             if (self.valid_tournament(tournament)):
@@ -70,3 +76,5 @@ class Tournament_Loader:
                 melee_tournament = melee.Tournament(tid, name, date, phase_groups_url)
                 self.tournaments[phase_groups_url] = melee_tournament
                 print('{0} added to tournaments'.format(name))
+
+Tournament_Loader().load_tournaments()
