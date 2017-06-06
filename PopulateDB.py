@@ -114,7 +114,7 @@ def populate_players():
                 #twitch_stream = split_line[4]
                 state = split_line[3]
                 country = split_line[4]
-                cur.execute(''' INSERT OR IGNORE INTO Player (player_id, tag, elo, prefix, state, country)
+                cur.execute(''' INSERT INTO Player (player_id, tag, elo, prefix, state, country)
                 VALUES ( ?, ?, ?, ?, ?, ? )''', (player_id, tag, 0, prefix, state, country))
     print("Insertion successful")
     conn.commit()
@@ -128,7 +128,7 @@ def populate_tournaments():
             tournament_id = line.split()[3]
             tournament = Tournament(tournament_id, tournament_name, tournament_date)
             Tournaments.append(tournament)
-            cur.execute(''' INSERT OR IGNORE INTO Tournament (tournament_id, tournament_name, tournament_date)
+            cur.execute(''' INSERT INTO Tournament (tournament_id, tournament_name, tournament_date)
                 VALUES (?, ?, datetime(?, 'unixepoch', 'localtime'))''', (tournament.tournament_id, tournament.tournament_name, tournament.tournament_date))
     print("Insertion successful")
     conn.commit()
@@ -145,7 +145,7 @@ def populate_sets():
                 tournament_id = line.split()[4]
                 tournament_set = TournamentSet(entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, tournament_id)
                 TournamentSets.append(tournament_set)
-                cur.execute(''' INSERT OR IGNORE INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id)
+                cur.execute(''' INSERT INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id)
                 VALUES ( ?, ?, ?, ?, ?, ?, ? )''', (tournament_set.entrant_1_id, tournament_set.entrant_1_score, tournament_set.entrant_2_id, tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament_set.tournament_id))
     conn.commit()
 

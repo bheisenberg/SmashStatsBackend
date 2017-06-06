@@ -6,7 +6,7 @@ import requests
 import  time
 
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
-
+prev_tournaments = 0
 
 
 class Tournament_Loader:
@@ -50,7 +50,18 @@ class Tournament_Loader:
         with open('save\save_data.txt', 'w') as file:
             file.write(str(tournaments))
 
+    def load_count(self):
+        with open('save\save_data.txt', 'r') as file:
+            return file.readline()
+
+    def get_new(self, tournaments):
+        pages = int(tournaments/100)
+        base = pages * 100
+        last = tournaments-base
+
+
     def load_tournaments(self):
+        prev_tournaments = self.load_count()
         connection = smash_gg_connector.Connection(base_url)
         tournaments = connection.tournaments
         pages = connection.pages
@@ -76,5 +87,3 @@ class Tournament_Loader:
                 melee_tournament = melee.Tournament(tid, name, date, phase_groups_url)
                 self.tournaments[phase_groups_url] = melee_tournament
                 print('{0} added to tournaments'.format(name))
-
-Tournament_Loader().load_tournaments()

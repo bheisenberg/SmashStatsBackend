@@ -6,11 +6,13 @@ import load_players
 import load_sets
 import populate_db
 
+db = 'smashstats'
+
 tournaments = load_tournaments.Tournament_Loader().load_tournaments()
 phases = load_phases.Group_Loader(tournaments).load_phases()
 player_container = load_players.Player_Loader(phases).load_players()
 phase_sets = load_sets.load_sets(player_container.player_dict, phases)
-populate_db.populate(tournaments, player_container.player_list, phase_sets)
+populate_db.populate(db, tournaments.values(), player_container.player_list, phase_sets)
 
 
 

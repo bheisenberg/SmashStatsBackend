@@ -34,6 +34,9 @@ class Tournament:
         self.date = date
         self.phase_url = phase_url
 
+    def to_string(self):
+        return '{0} {1} {2}'.format(self.tid, self.name, self.date)
+
 class Player:
     def __init__(self, pid, tag, prefix, state, country):
         self.pid = pid

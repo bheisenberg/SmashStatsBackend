@@ -3,7 +3,7 @@ import melee
 import smash_gg_connector
 import grequests
 import requests
-import  time
+import time
 
 base_url = 'https://api.smash.gg/public/tournaments/schedule?expand[]&page=1&per_page=100'
 
@@ -33,6 +33,14 @@ class Tournament_Loader:
     def valid_tournament (self, tournament):
         return self.melee_slug(tournament) is not None and self.tournament_complete(tournament)
 
+    def format_string(self, string):
+        if string is not None:
+            new_string = string.replace(' ', '_')
+            if '"' in new_string or "'" in new_string:
+                return new_string.replace('"', r'\"').replace("'", r"\'")
+            else:
+                return new_string.replace('\\', "\\\\")
+
     def get_urls(self, pages):
         x = 1
         urls = []
@@ -46,9 +54,7 @@ class Tournament_Loader:
         print(exception)
 
     def load_tournaments(self):
-        connection = smash_gg_connector.Connection(base_url)
-        tournaments = connection.tournaments
-        pages = connection.pages
+        pages = smash_gg_connector.Connection(base_url).pages
         urls = self.get_urls(pages)
         session = requests.Session()
         rs = (grequests.get(url, session=session) for url in urls)
@@ -59,10 +65,11 @@ class Tournament_Loader:
         return self.tournaments
 
     def parse_tournament(self, r):
+        print(r)
         tournament_page = self.get_tournaments(r.json())
         for tournament in tournament_page:
             if (self.valid_tournament(tournament)):
-                name = format(tournament['name'])
+                name = self.format_string(tournament['name'])
                 tid = str(tournament['id'])
                 slug = self.melee_slug(tournament)
                 date = tournament['startAt']
