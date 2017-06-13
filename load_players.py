@@ -38,11 +38,13 @@ class Player_Loader():
 
     def format_string(self, string):
         if string is not None:
-            new_string = string.replace(' ', '_')
+            new_string = string
             if '"' in new_string or "'" in new_string:
                 return new_string.replace('"', r'\"').replace("'", r"\'")
             else:
                 return new_string.replace('\\', "\\\\")
+        else:
+            return ''
 
     def has_entrants(self, entrant_data):
         return 'entrants' in entrant_data['entities']
@@ -69,7 +71,6 @@ class Player_Loader():
             self.parse_entrant_page(r)
             time.sleep(0.01)
         print(len(self.player_dict))
-        #return Player_Container(self.player_dict, self.player_list)
         return Player_Container(self.player_dict, dict((obj.pid, obj) for obj in self.player_list).values())
 
     def parse_entrant_page(self, r):

@@ -1,18 +1,19 @@
-import sqlite3
-db = 'C:/users/Brian/Desktop/melee.sqlite'
+import pymysql
 
 def update_player_elo():
-    conn = sqlite3.connect(db)
+    conn = pymysql.connect(user='root', password='', database='smashstats')
     cursor = conn.cursor()
     print('Calculating elo...')
-    sets = cursor.execute(
-        '''SELECT s.winner_id, s.loser_id, t.tournament_date FROM TournamentSet s, Tournament t WHERE s.tournament_id = t.tournament_id ''').fetchall()
+    query = cursor.execute(
+        '''SELECT s.winner_id, s.loser_id, t.tournament_date FROM Sets s, Tournaments t WHERE s.tournament_id = t.id ORDER BY t.tournament_date ASC''')
+    sets = [item for item in cursor.fetchall()]
+    print(len(sets))
     sets.sort(key=lambda x: x[2])
     elo = Elo(sets)
     players = elo.Calculate_Elo()
     for player_id in players.keys():
         print(player_id)
-        cursor.execute('UPDATE Player SET elo = {0} WHERE player_id = {1}'.format(players[player_id].elo, player_id))
+        cursor.execute('UPDATE Players SET elo = {0} WHERE id = {1}'.format(players[player_id].elo, player_id))
     conn.commit()
 
 

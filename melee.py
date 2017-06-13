@@ -1,11 +1,9 @@
 #Created by Brian Eisenberg 4/25/2017
 
 class TournamentSet:
-    def __init__(self, entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, tid, url):
-        self.entrant_1_id = entrant_1_id
-        self.entrant_1_score = entrant_1_score
-        self.entrant_2_id = entrant_2_id
-        self.entrant_2_score = entrant_2_score
+    def __init__(self, entrant_1, entrant_2, tid, url):
+        self.__entrant_1 = entrant_1
+        self.__entrant_2 = entrant_2
         self.winner = self.get_winner()
         self.loser = self.get_loser()
         self.tid = tid
@@ -13,13 +11,21 @@ class TournamentSet:
 
 
     def get_winner(self):
-        return self.entrant_1_id if (self.entrant_1_score > self.entrant_2_score) else self.entrant_2_id
+        return self.__entrant_1 if (self.__entrant_1.score > self.__entrant_2.score) else self.__entrant_2
 
     def get_loser(self):
-        return self.entrant_1_id if (self.entrant_1_score < self.entrant_2_score) else self.entrant_2_id
+        return self.__entrant_1 if (self.__entrant_1.score < self.__entrant_2.score) else self.__entrant_2
+
+    def get_loser_score(self):
+        return
 
     def to_string(self):
-        return '{0} {1} {2} {3} {4}'.format(self.entrant_1_id, self.entrant_1_score, self.entrant_2_id, self.entrant_2_score, self.tid)
+        return '{0} {1} {2} {3} {4}'.format(self.winner.id, self.winner.score, self.loser.id, self.loser.score, self.tid)
+
+class Entrant:
+    def __init__(self, id, score):
+        self.id = id
+        self.score = score
 
 
 class Phase:

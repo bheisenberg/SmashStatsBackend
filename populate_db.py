@@ -1,5 +1,6 @@
 import os
 import pymysql
+import melee
 
 def populate(db_name, tournaments, players, sets):
     conn = pymysql.connect(user='root', password='', database=db_name)
@@ -12,19 +13,18 @@ def populate(db_name, tournaments, players, sets):
     for player in players:
         print(player.to_string())
         cursor.execute(
-            """INSERT INTO Player (player_id, tag, elo, prefix, state, country) VALUES ({0}, "{1}", {2}, "{3}", '{4}', '{5}')""".format(
+            """INSERT INTO Players (id, tag, elo, prefix, state, country) VALUES ({0}, "{1}", {2}, "{3}", '{4}', '{5}')""".format(
                 player.pid, player.tag, 0, player.prefix, player.state, player.country))
     for tournament in tournaments:
         print(tournament.to_string())
         cursor.execute(
-            """INSERT INTO Tournament (tournament_id, tournament_name, tournament_date) VALUES ({0}, '{1}', FROM_UNIXTIME({2}, '%y-%m-%d'))""".format(
+            """INSERT INTO Tournaments (id, tournament_name, tournament_date) VALUES ({0}, '{1}', FROM_UNIXTIME({2}, '%y-%m-%d'))""".format(
                 tournament.tid, tournament.name, tournament.date))
     for tournament_set in sets:
         print(tournament_set.to_string())
         cursor.execute(
-            """INSERT INTO TournamentSet (entrant_1_id, entrant_1_score, entrant_2_id, entrant_2_score, winner_id, loser_id, tournament_id, url) VALUES ( {0}, {1}, {2}, {3}, {4}, {5}, {6}, '{7}')""".format(
-                tournament_set.entrant_1_id, tournament_set.entrant_1_score, tournament_set.entrant_2_id,
-                tournament_set.entrant_2_score, tournament_set.winner, tournament_set.loser, tournament_set.tid,
+            """INSERT INTO Sets (winner_id, winner_score, loser_id, loser_score, tournament_id, url) VALUES ( {0}, {1}, {2}, {3}, {4}, '{5}' )""".format(
+                tournament_set.winner.id, tournament_set.winner.score, tournament_set.loser.id, tournament_set.loser.score, tournament_set.tid,
                 tournament_set.url))
     conn.commit()
     conn.close()
@@ -33,18 +33,18 @@ def populate(db_name, tournaments, players, sets):
 def create_tables(cursor):
     print('creating tables')
     cursor.execute('''
-    DROP TABLE IF EXISTS TournamentSet;
-    DROP TABLE IF EXISTS Player;
-    DROP TABLE IF EXISTS Tournament;
+    DROP TABLE IF EXISTS Sets;
+    DROP TABLE IF EXISTS Players;
+    DROP TABLE IF EXISTS Tournaments;
 
-    CREATE TABLE Tournament (
-        tournament_id INTEGER PRIMARY KEY,
+    CREATE TABLE Tournaments (
+        id INTEGER PRIMARY KEY,
         tournament_name VARCHAR(200),
         tournament_date DATE
     );
 
-    CREATE TABLE Player (
-        player_id INTEGER NOT NULL PRIMARY KEY UNIQUE,
+    CREATE TABLE Players (
+        id INTEGER NOT NULL PRIMARY KEY UNIQUE,
         tag VARCHAR(500),
         elo INTEGER,
         prefix VARCHAR(500),
@@ -52,19 +52,17 @@ def create_tables(cursor):
         country VARCHAR(500)
     );
 
-    CREATE TABLE TournamentSet (
-        set_id INTEGER PRIMARY KEY AUTO_INCREMENT,
-        entrant_1_id INTEGER,
-        entrant_1_score INTEGER,
-        entrant_2_id INTEGER,
-        entrant_2_score INTEGER,
+    CREATE TABLE Sets (
+        id INTEGER PRIMARY KEY AUTO_INCREMENT,
         winner_id INTEGER,
+        winner_score INTEGER,
         loser_id INTEGER,
+        loser_score INTEGER,
         tournament_id INTEGER,
         url VARCHAR(200),
-        FOREIGN KEY (tournament_id) REFERENCES Tournament(tournament_id),
-        FOREIGN KEY (entrant_1_id) REFERENCES Player(player_id),
-        FOREIGN KEY (entrant_2_id) REFERENCES Player(player_id)
+        FOREIGN KEY (tournament_id) REFERENCES Tournaments(id),
+        FOREIGN KEY (winner_id) REFERENCES Players(id),
+        FOREIGN KEY (loser_id) REFERENCES Players(id)
     );
     ''')
 

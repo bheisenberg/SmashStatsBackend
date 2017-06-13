@@ -35,7 +35,7 @@ class Tournament_Loader:
 
     def format_string(self, string):
         if string is not None:
-            new_string = string.replace(' ', '_')
+            new_string = string
             if '"' in new_string or "'" in new_string:
                 return new_string.replace('"', r'\"').replace("'", r"\'")
             else:

@@ -60,10 +60,12 @@ def parse_set_page (r):
                     entrant2_id = set_obj['entrant2Id']
                     entrant1_score = set_obj['entrant1Score']
                     entrant2_score = set_obj['entrant2Score']
-                    entrant1 = player_dict[entrant1_id].pid
-                    entrant2 = player_dict[entrant2_id].pid
+                    player_1_id = player_dict[entrant1_id].pid
+                    player_2_id = player_dict[entrant2_id].pid
+                    entrant_1 = melee.Entrant(player_1_id, entrant1_score)
+                    entrant_2 = melee.Entrant(player_2_id, entrant2_score)
                     tid = set_pages[url].tid
-                    new_set = melee.TournamentSet(entrant1, entrant1_score, entrant2, entrant2_score, tid, url)
+                    new_set = melee.TournamentSet(entrant_1, entrant_2, tid, url)
                     print(new_set.to_string())
                     sets.append(new_set)
                 except:
