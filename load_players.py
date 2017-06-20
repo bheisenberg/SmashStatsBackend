@@ -4,6 +4,7 @@ import melee
 import grequests
 import requests
 import time
+import pymysql
 
 class Player_Container():
     def __init__(self, player_dict, player_list):
@@ -16,6 +17,7 @@ class Player_Loader():
         self.phases = phases
         self.player_dict = {}
         self.player_list = []
+        self.placements = []
 
     def get_entrant_page(self, entrant_id):
         head = 'https://api.smash.gg/phase_group/'
@@ -64,6 +66,7 @@ class Player_Loader():
             return None
 
     def load_players(self):
+        #TODO: Add support for placings using finalPlacement
         urls = self.get_entrant_pages()
         session = requests.Session()
         rs = (grequests.get(url, session=session) for url in urls)

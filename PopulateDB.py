@@ -5,7 +5,7 @@ import urllib.request
 import time
 import sqlite3
 import time
-import Elo
+import elo
 import os
 
 db = os.path.expanduser('~/documents/smashstats/db/melee.sqlite')
@@ -153,7 +153,7 @@ def update_player_elo():
     print('Updating players...')
     sets = cur.execute('''SELECT s.winner_id, s.loser_id, t.tournament_date FROM TournamentSet s, Tournament t WHERE s.tournament_id = t.tournament_id ''').fetchall()
     sets.sort(key=lambda x: x[2])
-    eloCalculator = Elo.Elo(sets)
+    eloCalculator = elo.Elo(sets)
     players = eloCalculator.Calculate_Elo()
     for player_id in players.keys():
         #print(player_id)

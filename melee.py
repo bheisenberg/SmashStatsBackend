@@ -1,11 +1,13 @@
 #Created by Brian Eisenberg 4/25/2017
 
 class TournamentSet:
-    def __init__(self, entrant_1, entrant_2, tid, url):
+    def __init__(self, entrant_1, entrant_2, round_division, round_text, tid, url):
         self.__entrant_1 = entrant_1
         self.__entrant_2 = entrant_2
         self.winner = self.get_winner()
         self.loser = self.get_loser()
+        self.round_division = round_division
+        self.round_text = round_text
         self.tid = tid
         self.url = url
 
@@ -20,7 +22,7 @@ class TournamentSet:
         return
 
     def to_string(self):
-        return '{0} {1} {2} {3} {4}'.format(self.winner.id, self.winner.score, self.loser.id, self.loser.score, self.tid)
+        return '{0} {1} {2} {3} {4} {5} {6}'.format(self.winner.id, self.winner.score, self.loser.id, self.loser.score, self.round_division, self.round_text, self.tid)
 
 class Entrant:
     def __init__(self, id, score):
@@ -42,6 +44,16 @@ class Tournament:
 
     def to_string(self):
         return '{0} {1} {2}'.format(self.tid, self.name, self.date)
+
+class Placing:
+    def __init__(self, pid, place, tid):
+        self.pid = pid
+        self.place = place
+        self.tid = tid
+
+    def to_string(self):
+        return '{0} placed {1} at {2}'.format(self.pid, self.place, self.tid)
+
 
 class Player:
     def __init__(self, pid, tag, prefix, state, country):

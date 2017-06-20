@@ -12,9 +12,11 @@ def update_player_elo():
     elo = Elo(sets)
     players = elo.Calculate_Elo()
     for player_id in players.keys():
-        print(player_id)
+        #print(player_id)
         cursor.execute('UPDATE Players SET elo = {0} WHERE id = {1}'.format(players[player_id].elo, player_id))
     conn.commit()
+    conn.close()
+    print('Elo calculation complete.')
 
 
 class Tournament:
@@ -81,12 +83,10 @@ class Elo:
                 players[loser_id] = loser
                 #print(winner_id)
                 #print(loser_id)
-                record.append('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
-                record.append('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
-                print('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
-                print('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
+                #record.append('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
+                #record.append('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
+                #print('{0} gained {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(winner_id, win_elo, loser_id, winner.elo, winner.games, winner.calculate_k()))
+                #print('{0} lost {1} elo from {2}. Now has {3} after {4} games. K is now {5}'.format(loser_id, loss_elo, winner_id, loser.elo, loser.games, winner.calculate_k()))
                 #num += 1
         self.Save_Record(record)
         return players
-
-update_player_elo()
